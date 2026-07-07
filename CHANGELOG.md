@@ -3,6 +3,15 @@
 All notable changes to `realtime-go` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.1.1
+
+### Fixed
+
+- A lost message arriving in the same instant as the channel's attach
+  confirmation could skip the automatic gap heal, leaving the gap unfilled until
+  the next lost message. Gap healing now also runs while the channel is still
+  attaching.
+
 ## 0.1.0
 
 ### Added

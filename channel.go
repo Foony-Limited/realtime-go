@@ -738,8 +738,11 @@ func (ch *Channel) recordSerial(seq uint64) {
 	// server returns just the messages after the cursor, leaving the live
 	// subscription, presence watcher, and retained replay untouched (a re-subscribe
 	// would tear all three down for one dropped message). Debounced to one in-flight
-	// fetch.
-	if ch.backfilling || ch.state != ChannelAttached || ch.contiguousSerial == 0 {
+	// fetch. Attaching counts as live here: the attach ack's transition to attached
+	// runs on another goroutine and can lose the race with a message arriving right
+	// after it, and a message arriving at all proves the server has us subscribed.
+	live := ch.state == ChannelAttached || ch.state == ChannelAttaching
+	if ch.backfilling || !live || ch.contiguousSerial == 0 {
 		ch.mu.Unlock()
 		return
 	}
