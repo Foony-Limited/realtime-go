@@ -16,42 +16,69 @@ The module's only dependency is `github.com/coder/websocket`.
 ## Quick start
 
 ```go
+package main
+
 import (
 	"context"
 	"fmt"
+	"os"
 
 	realtime "github.com/Foony-Limited/realtime-go"
 )
 
-client, err := realtime.New(realtime.Options{
-	// Prefer AuthCallback over Key for apps distributed to users.
-	AuthCallback: func(ctx context.Context) (string, error) {
-		return fetchTokenFromYourServer(ctx)
-	},
-})
-if err != nil {
-	return err
+func main() {
+	ctx := context.Background()
+
+	// Initialize the realtime client with your Realtime API key. Go code usually
+	// runs on a server you trust, so key auth is the right fit here. (For
+	// request/response access without holding a connection open, use
+	// realtime.NewRest instead.)
+	client, err := realtime.New(realtime.Options{
+		Key: os.Getenv("FOONY_REALTIME_API_KEY"),
+		// How this client is named in presence and on the messages it publishes.
+		ClientID: "quickstart",
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer client.Close()
+
+	// Open the WebSocket and authenticate. This is optional (the first publish or
+	// subscribe connects lazily), but connecting eagerly surfaces a bad key here
+	// instead of on your first message.
+	if err := client.Connect(ctx); err != nil {
+		panic(err)
+	}
+	fmt.Println("connected to Foony Realtime")
+
+	// Get a reference to the "test-channel" channel. The same name always returns
+	// the same instance.
+	channel := client.Channels.Get("test-channel")
+
+	// Subscribe to all messages published to this channel. Message.Data is the raw
+	// JSON payload — unmarshal it into your own type as needed.
+	received := make(chan struct{})
+	channel.Subscribe(func(message *realtime.Message) {
+		fmt.Printf("received %s: %s\n", message.Name, message.Data)
+		close(received)
+	})
+
+	// Publish a test message to the channel. Publish returns once the server has
+	// acked it, and the subscription above receives it like any other subscriber.
+	if err := channel.Publish(ctx, "test-event", "hello world"); err != nil {
+		panic(err)
+	}
+
+	// Wait for the delivery before the program exits.
+	<-received
 }
-defer client.Close()
-
-channel := client.Channels.Get("chat:room-1")
-
-channel.Subscribe(func(message *realtime.Message) {
-	fmt.Println("chat message:", string(message.Data))
-})
-
-err = channel.Publish(ctx, "chat", map[string]string{"text": "hello world"})
-
-channel.Presence.Subscribe(func(event *realtime.PresenceEvent) {
-	fmt.Println(event.Action, event.ClientID, string(event.Data))
-})
-err = channel.Presence.Enter(ctx, map[string]string{"name": "Alice"})
 ```
 
-On a trusted server you can pass `Key` directly instead of `AuthCallback`. Your backend
-mints browser/client JWTs locally with `realtime.CreateJWT` (it signs with your Realtime
-API key, with no network call), or asks the service to mint one with
-`rest.Auth.RequestToken`. Either way the API key stays on your backend.
+Building an app you distribute to users? Don't ship the API key in it: construct the
+client with `AuthCallback` returning a short-lived JWT fetched from your backend, and
+have that backend mint the JWT locally with `realtime.CreateJWT` (it signs with your
+API key, with no network call) or via `rest.Auth.RequestToken`. Either way the key
+stays on your server.
 
 ## Local development against the realtime backend
 
