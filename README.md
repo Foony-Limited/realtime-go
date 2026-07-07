@@ -56,7 +56,7 @@ func main() {
 	channel := client.Channels.Get("test-channel")
 
 	// Subscribe to all messages published to this channel. Message.Data is the raw
-	// JSON payload — unmarshal it into your own type as needed.
+	// JSON payload. Unmarshal it into your own type as needed.
 	received := make(chan struct{})
 	channel.Subscribe(func(message *realtime.Message) {
 		fmt.Printf("received %s: %s\n", message.Name, message.Data)
@@ -109,29 +109,29 @@ with a `:`. Use colons to express hierarchy (`chat:rooms:42`). Dots are not allo
 
 ## API surface
 
-- `realtime.New(options)` — top-level `Client`. Owns the WebSocket; channels attach
+- `realtime.New(options)`: top-level `Client`. Owns the WebSocket. Channels attach
   lazily.
-- `client.Channels.Get(name)` — returns a stable `*Channel` for that name.
-- `channel.Subscribe(fn)` — message listener. Returns an unsubscribe func.
-- `channel.Subscribe(fn, "greeting")` — message listener for specific message names.
-- `channel.On(fn)` / `channel.OnEvent(realtime.ChannelEvent(realtime.ChannelAttached), fn)` —
+- `client.Channels.Get(name)`: returns a stable `*Channel` for that name.
+- `channel.Subscribe(fn)`: message listener. Returns an unsubscribe func.
+- `channel.Subscribe(fn, "greeting")`: message listener for specific message names.
+- `channel.On(fn)` / `channel.OnEvent(realtime.ChannelEvent(realtime.ChannelAttached), fn)`:
   channel lifecycle state listeners.
-- `channel.Publish(ctx, name, data)` — publish one message. Returns on ack. Payloads are
-  marshaled with `encoding/json`; delivered `Message.Data` is a `json.RawMessage`.
-- `channel.PublishBatch(ctx, messages)` — publish an atomic batch (stored, deduped, and
+- `channel.Publish(ctx, name, data)`: publish one message. Returns on ack. Payloads are
+  marshaled with `encoding/json`, and delivered `Message.Data` is a `json.RawMessage`.
+- `channel.PublishBatch(ctx, messages)`: publish an atomic batch (stored, deduped, and
   billed as one message).
-- `channel.History(ctx, params)` — recent messages, with serial-cursor paging.
-- `channel.Presence.Subscribe(fn)` / `channel.Presence.On(action, fn)` — presence
+- `channel.History(ctx, params)`: recent messages, with serial-cursor paging.
+- `channel.Presence.Subscribe(fn)` / `channel.Presence.On(action, fn)`: presence
   listeners.
-- `channel.Presence.Enter/Update/Leave(ctx, data)` — mutate this connection's
+- `channel.Presence.Enter/Update/Leave(ctx, data)`: mutate this connection's
   membership.
 - `client.Connection.On(fn)` / `client.Connection.OnState(state, fn)` /
-  `client.Connection.Once(state, fn)` — observe connection state.
-- `client.BatchPublish(ctx, specs...)` — publish to up to 100 channels in one call.
-- `realtime.CreateJWT(key, params)` — mint a capability-scoped JWT locally.
-- `realtime.NewCipher` + `realtime.WithCipher` — end-to-end encryption (AES-GCM); the
+  `client.Connection.Once(state, fn)`: observe connection state.
+- `client.BatchPublish(ctx, specs...)`: publish to up to 100 channels in one call.
+- `realtime.CreateJWT(key, params)`: mint a capability-scoped JWT locally.
+- `realtime.NewCipher` + `realtime.WithCipher`: end-to-end encryption (AES-GCM). The
   edge only ever sees ciphertext.
-- `realtime.NewRest(options)` — HTTP client for publish, history, presence, and token
+- `realtime.NewRest(options)`: HTTP client for publish, history, presence, and token
   minting without a connection (see [REST](#rest)).
 
 Errors from the service are `*realtime.ServerError` values carrying the numeric protocol
@@ -207,7 +207,7 @@ such publishes immediately.
 All exported methods are safe for concurrent use. Listeners run one at a time, in event
 order, on a dispatcher goroutine owned by the client, so a listener may call blocking
 SDK methods (like `Publish`) without deadlocking message delivery. Blocking calls take a
-`context.Context`; canceling it abandons the caller's wait, not the underlying
+`context.Context`. Canceling it abandons the caller's wait, not the underlying
 operation.
 
 ## Tests

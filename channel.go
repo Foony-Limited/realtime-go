@@ -154,7 +154,7 @@ type ChannelStateChange struct {
 }
 
 // transitionInfo carries the optional payload of one state transition. A nil
-// transitionInfo on a same-state transition is dropped; a non-nil one still reaches
+// transitionInfo on a same-state transition is dropped, while a non-nil one still reaches
 // listeners as a ChannelEventUpdate.
 type transitionInfo struct {
 	reason  error
@@ -340,7 +340,7 @@ func (ch *Channel) runAttach(attempt *attachAttempt) {
 		return &subscribeFrame{channel: ch.Name, id: id, lastSerial: lastSerial}
 	})
 	if err != nil && isCapabilityError(err) {
-		// Permission won't change on retry — stop trying and surface it.
+		// Permission won't change on retry, so stop trying and surface it.
 		ch.conn.forgetSubscription(ch.Name, -1)
 	}
 	ch.mu.Lock()
@@ -421,7 +421,7 @@ func (ch *Channel) Subscribe(listener func(*Message), names ...string) func() {
 			}
 		}
 	}
-	// Fire-and-forget attach; the listener stays registered even if attach fails so a
+	// Fire-and-forget attach. The listener stays registered even if attach fails so a
 	// retry-on-reconnect surfaces the right state.
 	go func() { _ = ch.Attach(context.Background()) }()
 	return unsubscribe
@@ -647,8 +647,8 @@ func (ch *Channel) deliverMessage(frame *msgFrame) {
 			ch.deliverSingle(memberMessage(frame, index))
 		}
 		// The whole batch is one server record with one serial. Ephemeral messages are
-		// never resumable, so they must not advance the cursor — the server would not
-		// find them.
+		// never resumable, so they must not advance the cursor, because the server would
+		// not find them.
 		if !frame.ephemeral {
 			ch.recordSerial(frame.seq)
 		}
@@ -662,7 +662,7 @@ func (ch *Channel) deliverMessage(frame *msgFrame) {
 
 // deliverSingle dispatches one message, dropping duplicates and decrypting first when a
 // cipher is set. A message whose encoding isn't a cipher encoding passes through
-// unchanged; a failed decrypt (wrong key / tampered) is dropped rather than delivered
+// unchanged, and a failed decrypt (wrong key / tampered) is dropped rather than delivered
 // as garbage.
 func (ch *Channel) deliverSingle(message *Message) {
 	if ch.isDuplicate(message) {
@@ -768,7 +768,7 @@ func (ch *Channel) backfill(fromSerial uint64) {
 			ch.onResumed(false)
 		}
 	}
-	// A failed fetch leaves the gap; the next gapped message retries it.
+	// A failed fetch leaves the gap. The next gapped message retries it.
 	ch.mu.Lock()
 	ch.backfilling = false
 	ch.mu.Unlock()
@@ -809,7 +809,7 @@ func (ch *Channel) onConnectionState(change ConnectionStateChange) {
 		}
 	case ConnectionConnected:
 		// The connection re-subscribes remembered channels on reconnect and reports
-		// the true resume outcome via onResumed; move to attaching until that ack
+		// the true resume outcome via onResumed, so move to attaching until that ack
 		// arrives rather than optimistically claiming a resume that may be a
 		// discontinuity.
 		if ch.state == ChannelSuspended {

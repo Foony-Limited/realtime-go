@@ -284,7 +284,7 @@ func TestSerialGapTriggersSurgicalFetch(t *testing.T) {
 	got := make(chan *Message, 8)
 	channel.Subscribe(func(message *Message) { got <- message })
 	nextFrame[*subscribeFrame](t, edge)
-	// Serial 5 baselines the cursor; serial 7 is a gap (6 was lost) and must trigger
+	// Serial 5 baselines the cursor. Serial 7 is a gap (6 was lost) and must trigger
 	// a fetch from 5, not a re-subscribe.
 	edge.pushLatest(&msgFrame{channel: "room:1", name: "five", messageID: "m5", clientID: "c", seq: 5})
 	edge.pushLatest(&msgFrame{channel: "room:1", name: "seven", messageID: "m7", clientID: "c", seq: 7})
@@ -303,7 +303,7 @@ func TestSerialGapTriggersSurgicalFetch(t *testing.T) {
 			}
 		}
 	})
-	// Live order five, seven; the fetch replays six (seven dedups away).
+	// Live order is five then seven, and the fetch replays six (seven dedups away).
 	if names[0] != "five" || names[1] != "seven" || names[2] != "six" {
 		t.Errorf("names = %v", names)
 	}
@@ -457,7 +457,7 @@ func TestFlushSendsBufferedBatch(t *testing.T) {
 	if err := client.Connect(context.Background()); err != nil {
 		t.Fatalf("Connect: %v", err)
 	}
-	// A long interval would hold the second publish; Flush must force it out.
+	// A long interval would hold the second publish. Flush must force it out.
 	channel := client.Channels.Get("room:1", WithBatchOptions(BatchOptions{Interval: time.Hour}))
 	if err := channel.Publish(context.Background(), "first", 1); err != nil {
 		t.Fatalf("first publish: %v", err)

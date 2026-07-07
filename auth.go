@@ -113,12 +113,12 @@ type Auth struct {
 
 // CreateJWT mints a short-lived JWT scoped to params.Capability, signed with the
 // client's API key. This is local, with no network call. It returns an error when the
-// client was not constructed with a key — use the package-level [CreateJWT] to sign
+// client was not constructed with a key. Use the package-level [CreateJWT] to sign
 // with an explicit key.
 func (a *Auth) CreateJWT(params CreateJWTParams) (string, error) {
 	key := a.resolveKey()
 	if key == "" {
-		return "", errors.New("realtime: Auth.CreateJWT: no API key available — construct the client with Options.Key or use the package-level CreateJWT")
+		return "", errors.New("realtime: Auth.CreateJWT: no API key available (construct the client with Options.Key or use the package-level CreateJWT)")
 	}
 	return CreateJWT(key, params)
 }

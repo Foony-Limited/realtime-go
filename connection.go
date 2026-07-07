@@ -95,7 +95,7 @@ type ConnectionStateChange struct {
 }
 
 // Options configures a [Client]. Exactly one of Key, Token, or AuthCallback must be
-// set; [New] returns an error otherwise.
+// set, or [New] returns an error.
 type Options struct {
 	// Endpoint is the Realtime edge host or an absolute ws(s) URL. Defaults to
 	// "realtime.foony.io", which resolves to wss://realtime.foony.io.
@@ -499,7 +499,7 @@ func (c *Connection) publish(ctx context.Context, frame *publishFrame) error {
 		c.sendPublish(outstanding)
 	} else {
 		// Buffered: kick a connect so it drains even if no reconnect is pending yet
-		// (e.g. the very first publish); reconnect backoff drives subsequent retries.
+		// (e.g. the very first publish). Reconnect backoff drives subsequent retries.
 		go func() { _ = c.Connect(context.Background()) }()
 	}
 	select {
@@ -522,7 +522,7 @@ func (c *Connection) sendPublish(outstanding *outstandingPublish) {
 	ws := c.socket
 	c.mu.Unlock()
 	if err := c.send(ws, outstanding.frame); err != nil {
-		// Socket not actually open; leave it outstanding to (re)send on the next
+		// Socket not actually open, so leave it outstanding to (re)send on the next
 		// connect.
 		c.mu.Lock()
 		delete(c.publishRequestIDs, id)
@@ -564,7 +564,7 @@ func (c *Connection) settlePublishLocked(requestID uint64, err error) bool {
 	return true
 }
 
-// failOutstandingLocked rejects every outstanding publish — used when no resend path
+// failOutstandingLocked rejects every outstanding publish, used when no resend path
 // remains.
 func (c *Connection) failOutstandingLocked(err error) {
 	c.publishRequestIDs = make(map[uint64]string)
@@ -741,7 +741,7 @@ func (c *Connection) finishHandshake(ctx context.Context, ws *websocket.Conn, au
 		err := fmt.Errorf("realtime: auth failed: %d %s", first.code, first.message)
 		authError := first.code == CodeBadAuth || first.code == CodeAuthExpired
 		// An auth rejection only retries if AuthCallback can produce a fresh
-		// credential next attempt; a static Token/Key would be re-sent and rejected
+		// credential next attempt. A static Token/Key would be re-sent and rejected
 		// identically, so treat that as terminal.
 		if authError && c.opts.AuthCallback == nil {
 			c.mu.Lock()
@@ -898,7 +898,7 @@ func (c *Connection) handleFrame(frame any) {
 		}
 		c.mu.Unlock()
 	case *pongFrame, *connectedFrame:
-		// connected can only arrive once (the handshake consumed it); pong needs no
+		// connected can only arrive once (the handshake consumed it), and pong needs no
 		// handling beyond the proof-of-life the read loop already recorded.
 	}
 }
@@ -1012,7 +1012,7 @@ func (c *Connection) scheduleReconnectLocked() {
 		c.reconnectTimer = nil
 		c.mu.Unlock()
 		if err := c.Connect(context.Background()); err != nil {
-			// doConnect itself drove the state machine; schedule another attempt
+			// doConnect itself drove the state machine. Schedule another attempt
 			// unless we've been explicitly closed or hit a terminal auth failure.
 			c.mu.Lock()
 			if c.state != ConnectionClosed && c.state != ConnectionClosing && c.state != ConnectionFailed {
@@ -1210,7 +1210,7 @@ func (c *Connection) emitStateLocked(state ConnectionState, reason error) {
 	})
 }
 
-// newClientMessageID builds a client-assigned message id for a publish —
+// newClientMessageID builds a client-assigned message id for a publish:
 // "<unixMillis>-<random>", roughly time-sortable like the server's ids. Generated once
 // per publish and reused across resends, so the server's dedup window can collapse a
 // retried publish.

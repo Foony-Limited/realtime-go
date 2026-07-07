@@ -313,7 +313,7 @@ func TestCloseRejectsPendingRequests(t *testing.T) {
 		attached <- channel.Attach(context.Background())
 	}()
 	nextFrame[*subscribeFrame](t, edge)
-	// The sub was acked by the fake edge, so Attach resolves fine — this test pins
+	// The sub was acked by the fake edge, so Attach resolves fine. This test pins
 	// that Close afterwards leaves everything settled and the channel detached.
 	if err := <-attached; err != nil {
 		t.Fatalf("Attach: %v", err)

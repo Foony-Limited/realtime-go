@@ -435,7 +435,7 @@ func (ch *RestChannel) PublishMessages(ctx context.Context, messages ...RestPubl
 // come back as one item per message, sharing the batch's id and serial. On a channel
 // with a cipher, messages are decrypted before they are returned. How far back history
 // reaches depends on each message's retention, see https://foony.io/docs/history. It
-// returns one page; page through older messages with the result's Next. It returns a
+// returns one page. Page through older messages with the result's Next. It returns a
 // [RestError] when history cannot be read.
 func (ch *RestChannel) History(ctx context.Context, params RestHistoryParams) (*PaginatedResult[RestMessage], error) {
 	query := url.Values{}

@@ -1,8 +1,8 @@
 package realtime
 
-// Binary opcode protocol codec — the client half of the edge's wire format. Every frame
+// Binary opcode protocol codec, the client half of the edge's wire format. Every frame
 // is a 1-byte opcode then its fields (uvarints and length-prefixed byte slices). Field
-// orders mirror the server's wire package exactly; the golden tests in binary_test.go
+// orders mirror the server's wire package exactly. The golden tests in binary_test.go
 // pin them cross-language against the same byte vectors the realtime-js SDK uses.
 //
 // The client only needs encodeClientFrame (frames it sends) and decodeServerFrames
@@ -15,7 +15,7 @@ import (
 	"fmt"
 )
 
-// Frame opcodes — one per frame type, matching the server's wire.Op table.
+// Frame opcodes, one per frame type, matching the server's wire.Op table.
 const (
 	opAuth      = 1
 	opSub       = 2
@@ -50,7 +50,7 @@ const flagResponseSet = 1 << 0
 
 // authProtocolVersion is the byte after the auth opcode. A binary connection always
 // coalesces and receives binary delivery (both implied by speaking binary), so instead
-// of flags it carries a protocol version — 0 today, reserved for future connection-wide
+// of flags it carries a protocol version: 0 today, reserved for future connection-wide
 // format changes.
 const authProtocolVersion = 0
 
@@ -648,7 +648,7 @@ func decodeClientPublish(reader *binReader) *publishFrame {
 	frame.data = reader.jsonField()
 	frame.encoding = reader.str()
 	frame.messageID = reader.str()
-	// Reserved slot: was the per-message ttlMs. Read and discarded; see
+	// Reserved slot: was the per-message ttlMs. Read and discarded. See
 	// encodeBinaryPublish for why it stays on the wire.
 	reader.uvarint()
 	count := reader.uvarint()

@@ -109,8 +109,8 @@ type Channels struct {
 }
 
 // New builds a [Client] from options. Exactly one of Options.Key, Options.Token, or
-// Options.AuthCallback must be set; New returns an error otherwise. The connection is
-// opened lazily on first use — call [Client.Connect] to open it eagerly.
+// Options.AuthCallback must be set, or New returns an error. The connection is opened
+// lazily on first use. Call [Client.Connect] to open it eagerly.
 func New(options Options) (*Client, error) {
 	conn, err := newConnection(options)
 	if err != nil {
@@ -226,7 +226,7 @@ func (c *Client) BatchPublish(ctx context.Context, specs ...BatchSpec) (*BatchPu
 // Get returns the [Channel] named name, creating it on first use. The same name always
 // returns the same instance. name is 1 to 255 characters from "A-Z a-z 0-9 : - _" and
 // may not start with a ':'. Colons express hierarchy (e.g. "chat:rooms:42"), dots are
-// not allowed. Get panics on an invalid name — the server's grammar is enforced
+// not allowed. Get panics on an invalid name: the server's grammar is enforced
 // client-side so a bad name fails loudly here instead of attach-looping against
 // BadFrame rejections.
 //

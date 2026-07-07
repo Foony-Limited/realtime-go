@@ -53,7 +53,7 @@ type registration[T any] struct {
 
 // emitter is a small typed event emitter used by the SDK surfaces that need both
 // catch-all and event-specific listeners (connection state, channel state, messages,
-// presence). Listener registration returns an unsubscribe function; emit snapshots the
+// presence). Listener registration returns an unsubscribe function, and emit snapshots the
 // listeners and drops one-shot ones before invoking, so a re-entrant emit from inside a
 // listener cannot fire them twice.
 type emitter[E comparable, T any] struct {

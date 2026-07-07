@@ -81,7 +81,7 @@ func TestRestPublishBatchAndFields(t *testing.T) {
 	if len(gotBody) != 2 {
 		t.Fatalf("body = %v", gotBody)
 	}
-	// The client default fills a missing clientId; an explicit one wins.
+	// The client default fills a missing clientId, and an explicit one wins.
 	if gotBody[0]["clientId"] != "backend-bot" || gotBody[0]["id"] != "stable-1" {
 		t.Errorf("first = %v", gotBody[0])
 	}

@@ -166,7 +166,7 @@ func TestGoldenBundleWithBatchMember(t *testing.T) {
 }
 
 // TestClientFrameRoundTrip encodes every client frame, decodes it with the fake edge's
-// decoder, and re-encodes — the bytes must match, proving both directions agree.
+// decoder, and re-encodes. The bytes must match, proving both directions agree.
 func TestClientFrameRoundTrip(t *testing.T) {
 	frames := []any{
 		&authFrame{token: "tok", clientID: "c", resumeConnectionID: "r"},

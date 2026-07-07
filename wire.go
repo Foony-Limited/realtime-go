@@ -1,7 +1,7 @@
 package realtime
 
 // Wire protocol frame types for the Foony Realtime WebSocket service. These are the
-// in-memory frame shapes; on the wire every frame travels in the binary opcode format
+// in-memory frame shapes. On the wire, every frame travels in the binary opcode format
 // (binary.go).
 //
 // Mirrors services/realtime-saas/internal/wire/wire.go exactly. Any change here MUST be
@@ -51,7 +51,7 @@ const (
 //		// the token does not grant this action
 //	}
 type ServerError struct {
-	// Code is the machine-readable error code; see the Code* constants.
+	// Code is the machine-readable error code. See the Code* constants.
 	Code int
 	// Message is a human-readable error description for logging and debugging.
 	Message string
@@ -94,7 +94,7 @@ func validChannelName(name string) bool {
 
 // ---- internal frame shapes ----
 //
-// Client-originated frames carry a numeric id; the server echoes it back on the matching
+// Client-originated frames carry a numeric id. The server echoes it back on the matching
 // ack / err frame so the SDK can correlate requests to responses.
 
 // authFrame is the first frame after the WebSocket handshake. Carries either a JWT token
@@ -130,7 +130,7 @@ type wireMember struct {
 	encoding string
 }
 
-// publishFrame publishes to a channel. Single by default (name + data); when members is
+// publishFrame publishes to a channel. Single by default (name + data). When members is
 // set this is a batch publish (many messages under one messageID, stored and deduped by
 // the server as one durable message) and name/data are ignored.
 type publishFrame struct {
@@ -202,7 +202,7 @@ type connectedFrame struct {
 
 // ackFrame acknowledges a client request that does not need a structured reply. resumed
 // is the resume outcome for a subscribe that carried lastSerial (nil for non-resume
-// requests); seq is the serial the server assigned to an acked publish (0 for
+// requests), and seq is the serial the server assigned to an acked publish (0 for
 // ephemeral/unsequenced publishes).
 type ackFrame struct {
 	id      uint64
@@ -276,7 +276,7 @@ type historyResponseFrame struct {
 }
 
 // fetchResponseFrame answers a fetchFrame: the missed messages oldest-first. resumed is
-// false when the cursor had aged out of retention — a discontinuity the SDK surfaces and
+// false when the cursor had aged out of retention, a discontinuity the SDK surfaces and
 // re-baselines from instead of re-applying.
 type fetchResponseFrame struct {
 	id       uint64
